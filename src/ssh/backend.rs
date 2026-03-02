@@ -7,18 +7,18 @@ use crate::cursive::backends::termion::termion::event::MouseEvent as TMouseEvent
 use crate::cursive::backends::termion::termion::input::{Events, TermRead};
 use crate::cursive::backends::termion::termion::style as tstyle;
 
+use crate::cursive::Vec2;
 use crate::cursive::backend;
 use crate::cursive::event::{Event, Key, MouseButton, MouseEvent};
 use crate::cursive::theme;
-use crate::cursive::Vec2;
 use tokio::sync::mpsc::Receiver;
 use tokio::sync::mpsc::Sender;
 
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::fs::File;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum CursiveOutput {
@@ -77,7 +77,7 @@ pub struct Backend {
 /// SOFTWARE.
 #[cfg(unix)]
 fn set_blocking(fd: std::os::unix::io::RawFd, blocking: bool) -> std::io::Result<()> {
-    use libc::{fcntl, F_GETFL, F_SETFL, O_NONBLOCK};
+    use libc::{F_GETFL, F_SETFL, O_NONBLOCK, fcntl};
 
     let flags = unsafe { fcntl(fd, F_GETFL, 0) };
     if flags < 0 {
@@ -173,7 +173,7 @@ impl Backend {
                     TMouseButton::WheelUp => MouseEvent::WheelUp,
                     TMouseButton::WheelDown => MouseEvent::WheelDown,
                     TMouseButton::WheelLeft | TMouseButton::WheelRight => {
-                        return Event::Unknown(vec![])
+                        return Event::Unknown(vec![]);
                     }
                 };
 
@@ -223,6 +223,10 @@ impl Backend {
         {
             let mut data = self.data.borrow_mut();
             if !data.is_empty() {
+                if self.output_sender.is_closed() {
+                    data.clear();
+                    return;
+                }
                 self.output_sender
                     .blocking_send(CursiveOutput::Data(data.clone()))
                     .unwrap();
