@@ -224,6 +224,8 @@ impl Backend {
             let mut data = self.data.borrow_mut();
             if !data.is_empty() {
                 if self.output_sender.is_closed() {
+                    //Don't both sending if the channel is closed
+                    //already
                     data.clear();
                     return;
                 }
@@ -345,6 +347,11 @@ impl backend::Backend for Backend {
         {
             let mut data = self.data.borrow_mut();
             if !data.is_empty() {
+                if self.output_sender.is_closed() {
+                    data.clear();
+                    self.close(); //Unsure if this needs to be called or not
+                    return None;
+                }
                 self.output_sender
                     .blocking_send(CursiveOutput::Data(data.clone()))
                     .unwrap();
