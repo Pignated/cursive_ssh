@@ -1,8 +1,8 @@
-# ssh_ui
+# cursive_ssh
 
-`ssh_ui` helps you painlessly turn a [cursive](https://crates.io/crates/cursive)-based terminal UI (TUI) into an application accessible over ssh. Designed to make the creation of BBS systems or ssh-based games simple, `ssh_ui` takes a minimally opinionated approach to opening a TUI up to remote connections, beyond requiring you to use `cursive`. The ssh server implementation is provided by [russh](https://crates.io/crates/russh).
+`cursive_ssh` helps you painlessly turn a [cursive](https://crates.io/crates/cursive)-based terminal UI (TUI) into an application accessible over ssh. Designed to make the creation of BBS systems or ssh-based games simple, `cursive_ssh` takes a minimally opinionated approach to opening a TUI up to remote connections, beyond requiring you to use `cursive`. The ssh server implementation is provided by [russh](https://crates.io/crates/russh). The crate is a fork of the now archived [ssh_ui](https://crates.io/crates/ssh_ui) crate. This would not be possible without it's author, Ellen Poe.
 
-The `main` function of the simplest `ssh_ui`-based application looks something like this:
+The `main` function of the simplest `cursive_ssh`-based application looks something like this:
 
 ```
 #[tokio::main]
@@ -52,15 +52,19 @@ impl AppSession for DialogAppSession {
         println!("on_start");
         Ok(Box::new(
             Dialog::around(TextView::new("Hello over ssh!"))
-                .title("ssh_ui")
+                .title("cursive_ssh")
                 .button("Quit", |s| s.quit()),
         ))
     }
 }
 ```
 
-This is where the actual `cursive` TUI is created and returned to `ssh_ui`. You can return whatever TUI you want, and `ssh_ui` will take care of serving it to the client.
+This is where the actual `cursive` TUI is created and returned to `cursive_ssh`. You can return whatever TUI you want, and `cursive_ssh` will take care of serving it to the client.
 
 ## Contributions
 
-If you'd like to use `ssh_ui` and it doesn't quite fit your needs, feel free to open an issue or pull request on the [GitHub repository](https://github.com/ellenhp/ssh_ui).
+If you'd like to use `cursive_ssh` and it doesn't quite fit your needs, feel free to open an issue or pull request on the [GitHub repository](https://github.com/pignated/cursive_ssh).
+
+## Thanks
+
+I'd like to extend a special thanks to Ellen Poe, author of the ssh_ui crate, from which this is forked. 

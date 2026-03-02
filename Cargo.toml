@@ -1,10 +1,10 @@
 [package]
-name = "ssh_ui"
-version = "0.4.1"
-edition = "2021"
+name = "cursive_ssh"
+version = "0.1.0"
+edition = "2024"
 description = "Painlessly expose Rust TUI applications over ssh"
 license = "MIT"
-repository = "https://github.com/ellenhp/ssh_ui/"
+repository = "https://github.com/pignated/cursive_ssh"
 keywords = ["cursive", "tui", "ssh", "terminal"]
 categories = ["command-line-interface"]
 readme = "README.md"
