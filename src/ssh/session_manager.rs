@@ -1,14 +1,14 @@
 use std::{fmt::Debug, fs::File, time::Duration};
 
-use crate::{cursive::Vec2, SessionHandle};
+use crate::{SessionHandle, cursive::Vec2};
 use async_std::io::WriteExt;
 use log::{debug, info};
-use russh::{server::Handle, ChannelId, CryptoVec};
+use russh::{ChannelId, CryptoVec, server::Handle};
 use russh_keys::key::PublicKey;
 use tokio::{
     spawn,
     sync::{
-        mpsc::{channel, Receiver, Sender},
+        mpsc::{Receiver, Sender, channel},
         watch,
     },
     time::sleep,
@@ -131,10 +131,12 @@ impl SessionManager {
                 match output_receiver.recv().await {
                     Some(output) => match output {
                         crate::ssh::backend::CursiveOutput::Data(data) => {
-                            handle
-                                .data(channel_id, CryptoVec::from_slice(&data))
-                                .await
-                                .unwrap();
+                            match handle.data(channel_id, CryptoVec::from_slice(&data)).await {
+                                Ok(_) => {}
+                                Err(_) => break, //Looking at the implementation of handle.data in
+                                                 //source, it seems an error means that the other side is
+                                                 //unreachable, so it can close here
+                            }
                         }
                         crate::ssh::backend::CursiveOutput::Close => {
                             debug!(
@@ -185,7 +187,10 @@ impl SessionManager {
         })
         .await
         .unwrap();
-        debug!("Fell through input forwarding task, indicating disconnection on session {}. Aborting/joining other tasks/threads.", handle_id.0);
+        debug!(
+            "Fell through input forwarding task, indicating disconnection on session {}. Aborting/joining other tasks/threads.",
+            handle_id.0
+        );
         let _ = exit_tx.send(true);
         forwarding_task_handle.abort();
         join_handle.join().expect("Failed to join thread");
